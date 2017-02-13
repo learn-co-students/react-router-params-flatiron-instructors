@@ -141,7 +141,7 @@ ReactDOM.render(
   </Provider>),
 document.getElementById('container'));
 ```
-Note that we **must** define our `/movies/new` route first. Why? Because otherwise, the `/:id` route handler would catch it first and assing `"new"` to be the id.
+Note that we **must** define our `/movies/new` route first. Why? Because otherwise, the `/:id` route handler would catch it first and assessing `"new"` to be the id.
 
 Let's add a link to our Movies List to add a new movie.
 
@@ -215,8 +215,44 @@ export default connect(null, mapDispatchToProps)(MoviesNew)
 
 We can use `browserHistory` to update the URL in any component lifecycle method or any event handler. Now, after submitting our form, we're sent back to the index route. Awesome!
 
+
+### The Index Route
+Take another look at our routes file.  What you will see is that we can visit the `/movies/new` and the MoviesPage component will receive the MoviesNew component as its child.  Upon visiting `movies/3` the MoviesPage component receives the MoviesShow component as its child.  However, what if we want to allow the user to visit the `/movies` url.  Likely, we still want the parent component to display, yet we also want another component passed through as our child.  So one might be tempted to have two Routes both a parent and a child each pointing to '/movies', but that would be confusing: the parent of '/movies' is '/movies'?  Instead react router provides a separate component: IndexRoute.  The IndexRoute simply sets the path as the path in the parent route.  So to render out a MoviesIndex component when a user visits `/movies` we do the following:
+
+
+```javascript
+// index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import {createStore} from 'redux';
+import rootReducer from './reducers'
+import { Provider } from 'react-redux';
+
+// import IndexRoute from react-router
+import {Router, Route, IndexRoute, browserHistory} from 'react-router';
+
+ReactDOM.render(
+  (<Provider store={store} >
+    <Router history={browserHistory} >
+      <Route path="/" component={App} >
+        <Route path='/movies' component={MoviesPage} >
+          <IndexRoute component={MoviesIndex}/>
+          <Route path="/movies/new" component={MoviesNew} />
+          <Route path="/movies/:id" component={MoviesShow} />
+        </Route>
+      </Route>
+    </Router>
+  </Provider>),
+document.getElementById('container'));
+```
+
+So by making use of the IndexRoute we can specify the component that should be passed through as the child prop when the user visits the top-level of a nested route.
+
 ### Summary
 
 So in this section we saw how upon visiting a url, React Router will supply any dynamic pieces of the URL to the related component via an object called `routeParams`.  We then saw how to access those props in our mapStateToProps function as ownProps, and how to use those props to find the related movie.
 
 Then we saw how after taking an action like creating a new movie, we can change the url by using the browserHistory.push method.  So a call to browserHistory.push('/movies') changes the url to `/movies`.
+
+Finally, we saw that by making use of the IndexRoute we can specify the component that should be passed through as the child prop when the user visits the top-level of a nested route.
